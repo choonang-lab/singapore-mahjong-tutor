@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- brand green table background (full-bleed so it is maskable-safe) -->
+  <rect width="512" height="512" fill="#0f7b3e"/>
+  <!-- ivory mahjong tile -->
+  <rect x="140" y="104" width="232" height="304" rx="30" fill="#fffdf7"/>
+  <rect x="140" y="104" width="232" height="304" rx="30" fill="none" stroke="#cfc8b6" stroke-width="6"/>
+  <!-- 中 drawn as vectors (font-independent): open box + vertical bar -->
+  <rect x="184" y="176" width="144" height="150" rx="6" fill="none" stroke="#b4232a" stroke-width="22"/>
+  <rect x="245" y="150" width="22" height="212" fill="#b4232a"/>
+</svg>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Singapore Mahjong Tutor — Efficiency Trainer</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0f7b3e" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SG Mahjong" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>🀄 Efficiency Trainer</h1>
+      <p class="tagline">Module 1 · Tile efficiency — <em>which tile do you discard?</em></p>
+    </header>
+
+    <section class="status">
+      <div class="stat"><span class="label">Shanten</span><span id="shanten" class="value">–</span></div>
+      <div class="stat"><span class="label">Streak</span><span id="streak" class="value">0</span></div>
+      <div class="stat"><span class="label">Optimal</span><span id="score" class="value">0 / 0</span></div>
+    </section>
+
+    <p id="prompt" class="prompt">You just drew a tile. Click the tile you'd <strong>discard</strong> for maximum acceptance.</p>
+
+    <div id="hand" class="hand" role="group" aria-label="Your hand"></div>
+
+    <div id="feedback" class="feedback" hidden></div>
+
+    <div class="controls">
+      <button id="newHand" class="primary">New hand</button>
+      <button id="hint">Show best</button>
+      <label class="toggle" for="difficulty">Difficulty
+        <select id="difficulty">
+          <option value="easy">Easy · closer to ready</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard · early hand</option>
+        </select>
+      </label>
+      <label class="toggle"><input type="checkbox" id="autoNext" /> Auto next on correct</label>
+      <span class="kbd-hint" aria-hidden="true">N new · H hint · Enter next</span>
+    </div>
+
+    <div class="session">
+      <span id="sessionSummary">No hands played yet this session.</span>
+      <button id="resetStats" class="link" type="button">Reset stats</button>
+    </div>
+
+    <details class="explainer">
+      <summary>How scoring works</summary>
+      <p><strong>Shanten</strong> = how many tile-swaps from a winning hand (0 = ready to win).
+      <strong>Acceptance (ukeire)</strong> = the number of live tiles that would improve your hand
+      after a discard. The best discard is the one that keeps you at the lowest shanten with the
+      most accepting tiles. Flowers, seasons and animals are bonus tiles and never appear in the hand.</p>
+      <p class="note">v1 uses standard hands only (4 sets + 1 pair) and counts remaining tiles from your
+      hand alone. Opponent discards and house-rule value scoring come in later modules.</p>
+    </details>
+  </main>
+
+  <script src="src/engine.js"></script>
+  <script src="src/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* offline still works after first load fails gracefully */ });
+      });
+    }
+  </script>
+</body>
+</html>
