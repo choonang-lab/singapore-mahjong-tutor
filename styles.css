@@ -58,6 +58,47 @@ header h1 { margin: 0 0 10px; font-size: 1.5rem; }
 .tagline { margin: 0 0 20px; color: var(--muted); }
 .tagline em { color: var(--ink); font-style: italic; }
 
+header h1 button {
+  font: inherit; color: inherit; background: none; border: none; box-shadow: none;
+  padding: 0; cursor: pointer;
+}
+header h1 button:hover { border: none; opacity: .85; }
+
+/* home screen */
+.hero { font-size: 1.05rem; margin: 0 0 20px; color: var(--ink); }
+.hero em { color: var(--accent); font-style: normal; font-weight: 600; }
+.path { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 8px; }
+.path li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .95rem; }
+.path-n {
+  flex: 0 0 auto; width: 24px; height: 24px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: .8rem;
+}
+.home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.home-card {
+  display: flex; gap: 14px; text-align: left; align-items: flex-start;
+  padding: 16px; border-radius: 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow);
+  font: inherit; color: var(--ink); transition: transform .08s ease, border-color .08s ease;
+}
+.home-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.hc-num {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--good-bg); color: var(--accent); font-weight: 800; font-size: 1.1rem;
+}
+.hc-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hc-title { font-weight: 700; font-size: 1.02rem; display: flex; align-items: center; gap: 8px; }
+.hc-tag {
+  font-size: .64rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
+  color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px;
+}
+.hc-desc { font-size: .86rem; color: var(--muted); line-height: 1.4; }
+.hc-progress { font-size: .78rem; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.hc-progress.started { color: var(--accent); font-weight: 600; }
+.home-foot { color: var(--muted); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 14px; }
+.home-foot .link { font-size: .88rem; }
+
 /* module nav */
 .modules { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .modules button {
@@ -299,6 +340,8 @@ button.link:hover { border: none; }
   .accept-label { min-width: 100%; }        /* stack label above its tiles */
   .mini { font-size: 22px; }               /* larger tap/read size for accept tiles */
   .rules-form { grid-template-columns: 1fr; }
+  .home-cards { grid-template-columns: 1fr; }
+  .hero { font-size: 1rem; }
 }
 
 /* give a touch of extra top space when installed as a standalone app */

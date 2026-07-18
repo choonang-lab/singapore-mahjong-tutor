@@ -21,9 +21,10 @@
 <body>
   <main>
     <header>
-      <h1>🀄 Singapore Mahjong Tutor</h1>
+      <h1><button id="homeLink" type="button" data-target="module-home">🀄 Singapore Mahjong Tutor</button></h1>
       <nav class="modules" id="moduleNav">
-        <button data-target="module-efficiency" class="active">1 · Efficiency</button>
+        <button data-target="module-home">Home</button>
+        <button data-target="module-efficiency">1 · Efficiency</button>
         <button data-target="module-value">2 · Value</button>
         <button data-target="module-bonus">3 · Bonus</button>
         <button data-target="module-defense">4 · Defense</button>
@@ -31,8 +32,59 @@
       </nav>
     </header>
 
+    <!-- ============ HOME ============ -->
+    <section id="module-home">
+      <p class="hero">Four short trainers for the four decisions that win Singapore mahjong —
+      <em>speed, value, bonuses, and safety</em>. Each grades you against a solver, works offline, and reads one editable rule set.</p>
+
+      <ol class="path">
+        <li><span class="path-n">1</span> Reach a winning hand fastest</li>
+        <li><span class="path-n">2</span> Know what a hand is worth</li>
+        <li><span class="path-n">3</span> Cash in animals &amp; flowers</li>
+        <li><span class="path-n">4</span> Don't feed the other players</li>
+      </ol>
+
+      <div class="home-cards" id="homeCards">
+        <button class="home-card" data-target="module-efficiency">
+          <span class="hc-num">1</span>
+          <span class="hc-body">
+            <span class="hc-title">Efficiency <span class="hc-tag">speed</span></span>
+            <span class="hc-desc">Which tile to discard to reach tenpai fastest — shanten &amp; tile acceptance.</span>
+            <span class="hc-progress" data-stat="eff">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-value">
+          <span class="hc-num">2</span>
+          <span class="hc-body">
+            <span class="hc-title">Value <span class="hc-tag">tai</span></span>
+            <span class="hc-desc">How many tai a winning hand is worth — flushes, pongs, dragons, ping hu.</span>
+            <span class="hc-progress" data-stat="value">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-bonus">
+          <span class="hc-num">3</span>
+          <span class="hc-body">
+            <span class="hc-title">Bonus <span class="hc-tag">animals</span></span>
+            <span class="hc-desc">Animals, flowers &amp; instant payouts — the Singapore signature.</span>
+            <span class="hc-progress" data-stat="bonus">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-defense">
+          <span class="hc-num">4</span>
+          <span class="hc-body">
+            <span class="hc-title">Defense <span class="hc-tag">safety</span></span>
+            <span class="hc-desc">Which tile is safe to discard — genbutsu &amp; suji reading.</span>
+            <span class="hc-progress" data-stat="defense">Not started</span>
+          </span>
+        </button>
+      </div>
+
+      <p class="home-foot">Table rules vary by house — tune every value on the <button class="link" type="button" data-target="module-rules">⚙ Rules</button> screen.
+      Add this page to your home screen to play offline.</p>
+    </section>
+
     <!-- ============ MODULE 1 — EFFICIENCY ============ -->
-    <section id="module-efficiency">
+    <section id="module-efficiency" hidden>
       <p class="tagline">Tile efficiency — <em>which tile do you discard?</em></p>
 
       <section class="status">
@@ -233,19 +285,23 @@
   <script src="src/defense.js"></script>
   <script src="src/defense-app.js"></script>
   <script src="src/rules-editor.js"></script>
+  <script src="src/home.js"></script>
   <script>
-    // module navigation
+    // shared navigation — any [data-target] element (nav tab, home card, title) switches view
     (function () {
       const nav = document.getElementById('moduleNav');
-      nav.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-target]');
-        if (!btn) return;
-        nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b === btn));
-        document.querySelectorAll('main > section[id^="module-"]').forEach((s) => {
-          s.hidden = (s.id !== btn.dataset.target);
-        });
+      function activate(target) {
+        nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.target === target));
+        document.querySelectorAll('main > section[id^="module-"]').forEach((s) => { s.hidden = (s.id !== target); });
+        if (target === 'module-home' && window.__homeRefresh) window.__homeRefresh();
         window.scrollTo(0, 0);
+      }
+      window.__activateModule = activate;
+      document.addEventListener('click', (e) => {
+        const el = e.target.closest('[data-target]');
+        if (el) activate(el.dataset.target);
       });
+      activate('module-home');
     })();
 
     if ('serviceWorker' in navigator) {
