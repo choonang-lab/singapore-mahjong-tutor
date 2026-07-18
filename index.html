@@ -26,6 +26,7 @@
         <button data-target="module-efficiency" class="active">1 · Efficiency</button>
         <button data-target="module-value">2 · Value</button>
         <button data-target="module-bonus">3 · Bonus</button>
+        <button data-target="module-defense">4 · Defense</button>
         <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
@@ -160,6 +161,48 @@
       </details>
     </section>
 
+    <!-- ============ MODULE 4 — DEFENSE ============ -->
+    <section id="module-defense" hidden>
+      <p class="tagline">Defense — <em>which tile is safe to discard?</em></p>
+
+      <div class="context-bar" id="d-context" aria-label="Situation"></div>
+
+      <p class="river-label">West's discards <span class="river-hint">(tiles here are safe against West — furiten)</span></p>
+      <div id="d-river" class="river" role="group" aria-label="West's discards"></div>
+
+      <p class="prompt">Your hand — click the tile you'd <strong>discard</strong> to stay safe.</p>
+      <div id="d-hand" class="hand" role="group" aria-label="Your hand"></div>
+
+      <div id="d-feedback" class="feedback" hidden></div>
+
+      <div class="controls">
+        <button id="d-newDeal" class="primary">New deal</button>
+        <label class="toggle" for="d-difficulty">Difficulty
+          <select id="d-difficulty">
+            <option value="easy">Easy · more safe tiles</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard · fewer safe tiles</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="session">
+        <span id="d-session">No discards played yet this session.</span>
+        <button id="d-reset" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>Reading safety</summary>
+        <p><strong>Genbutsu 現物</strong> — a tile already in an opponent's discards is <strong>100% safe</strong>
+        against them: the furiten rule forbids winning on a tile you've discarded. This is the bedrock of defense.</p>
+        <p><strong>Suji 筋</strong> — a two-sided (ryanmen) wait covers two tiles three apart (e.g. 4–7).
+        If West discarded the 4, a 5-6 shape waiting 4–7 would be furiten, so the <strong>7 is safer</strong>.
+        Suji only rules out two-sided waits — a tanki, shanpon or kanchan can still hit it, so it's <em>likely</em>, not guaranteed.</p>
+        <p class="note">v1 defends against one opponent from their discard river. Wall-count (“no-chance”) reads,
+        multiple opponents, and push-vs-fold EV come later. Discarding a genbutsu is always the optimal answer here.</p>
+      </details>
+    </section>
+
     <!-- ============ RULES EDITOR ============ -->
     <section id="module-rules" hidden>
       <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
@@ -187,6 +230,8 @@
   <script src="src/value.js"></script>
   <script src="src/bonus.js"></script>
   <script src="src/bonus-app.js"></script>
+  <script src="src/defense.js"></script>
+  <script src="src/defense-app.js"></script>
   <script src="src/rules-editor.js"></script>
   <script>
     // module navigation

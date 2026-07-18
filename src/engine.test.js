@@ -1,4 +1,4 @@
-const { shanten, ukeire, bestDiscards, totalTiles } = require('./engine');
+const { shanten, ukeire, bestDiscards, waits, totalTiles } = require('./engine');
 
 // Helpers to build hands from a compact string like "123m 456m 789m 123p 55p"
 function toCounts(str) {
@@ -43,6 +43,17 @@ eq('ryanmen accepts 8 tiles', u1.total, 8);
 
 // ---- bestDiscards ----
 // 14 tiles: 123m 456m 789m 123p 5p5p + extra 9s floater -> discard 9s keeps best
+// ---- waits ----
+function waitNames(counts) {
+  const suitName = ['m','p','s'];
+  const nm = (i) => i < 27 ? (i%9+1)+suitName[Math.floor(i/9)] : ['E','S','W','N','Rd','Gr','Wh'][i-27];
+  return waits(counts).map(nm).sort();
+}
+eq('ryanmen wait 45s -> 3s,6s', JSON.stringify(waitNames(toCounts('123m 456m 789m 11p 45s'))), JSON.stringify(['3s','6s']));
+eq('tanki wait 5p', JSON.stringify(waitNames(toCounts('123m 456m 789m 123s 5p'))), JSON.stringify(['5p']));
+eq('shanpon wait 11p/99p', JSON.stringify(waitNames(toCounts('123m 456m 789m 11p 99p'))), JSON.stringify(['1p','9p']));
+eq('not tenpai -> no waits', waits(toCounts('123m 456m 789m 12p 46s')).length, 0);
+
 const bd = bestDiscards(toCounts('123m 456m 789m 123p 55p 9s'));
 const best = bd[0];
 const suitName = ['m','p','s'];

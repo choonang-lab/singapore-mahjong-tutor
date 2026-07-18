@@ -92,6 +92,28 @@ header h1 { margin: 0 0 10px; font-size: 1.5rem; }
 .tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 .tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 
+/* defense (Module 4) */
+.river-label { margin: 0 0 8px; color: var(--muted); font-size: .9rem; }
+.river-hint { font-size: .8rem; }
+.river {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 18px;
+  padding: 12px; border: 1px dashed var(--line); border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 60%, transparent);
+}
+.tile.mini-river { width: 34px; height: 46px; font-size: 24px; border-bottom-width: 2px; cursor: default; }
+/* safety classification (applied after answering) */
+.tile.cls-genbutsu { border-color: var(--good); box-shadow: inset 0 0 0 2px var(--good-bg); background: var(--good-bg); }
+.tile.cls-suji { border-color: #2b6cb0; box-shadow: inset 0 0 0 2px #dbeafe; }
+.tile.cls-dealin { border-color: var(--bad); background: var(--bad-bg); box-shadow: inset 0 0 0 2px var(--bad); }
+.tile.cls-live { opacity: .6; }
+.tile.chosen { outline: 3px solid var(--ink); outline-offset: 1px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.legend .lg { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.legend .lg.cls-genbutsu { color: var(--good); background: var(--good-bg); border-color: var(--good); box-shadow: none; }
+.legend .lg.cls-suji { color: #2b6cb0; background: #dbeafe; border-color: #2b6cb0; box-shadow: none; }
+.legend .lg.cls-dealin { color: var(--bad); background: var(--bad-bg); border-color: var(--bad); box-shadow: none; }
+.legend .lg.cls-live { color: var(--muted); opacity: 1; box-shadow: none; }
+
 /* bonus / animal tiles (Module 3) */
 .bonus-tile { position: relative; }
 .animal-tile { font-size: 30px; }             /* emoji animals */

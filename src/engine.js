@@ -132,6 +132,21 @@ function bestDiscards(counts, seen) {
   return results;
 }
 
+/**
+ * Winning tiles for a 13-tile tenpai hand: every tile type that completes it.
+ * Returns an array of tile indices (empty if the hand is not tenpai).
+ */
+function waits(counts) {
+  const res = [];
+  for (let i = 0; i < NUM_TYPES; i++) {
+    if (counts[i] >= 4) continue;
+    counts[i]++;
+    if (shanten(counts) === -1) res.push(i);
+    counts[i]--;
+  }
+  return res;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { shanten, ukeire, bestDiscards, totalTiles, NUM_TYPES };
+  module.exports = { shanten, ukeire, bestDiscards, waits, totalTiles, NUM_TYPES };
 }
