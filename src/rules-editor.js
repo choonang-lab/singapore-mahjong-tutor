@@ -29,8 +29,16 @@
       { key: 'smallThreeDragons', label: 'Small three dragons 小三元' },
       { key: 'bigThreeDragons', label: 'Big three dragons 大三元' },
     ]},
-    { title: 'Bonus tiles', items: [
-      { key: 'seatFlower', label: 'Seat flower/season (each)' },
+    { title: 'Bonus — hand tai', items: [
+      { key: 'seatFlower', label: 'Own flower/season (each)' },
+      { key: 'animalTai', label: 'Animal tile (each)' },
+    ]},
+    { title: 'Bonus — instant payouts', items: [
+      { key: 'instAnimalPair', label: 'Cat+Rat / Rooster+Centipede', hint: 'per completed pair' },
+      { key: 'instFourAnimals', label: 'All four animals', hint: 'on top of the two pairs' },
+      { key: 'instOwnFlowers', label: 'Own flower + own season' },
+      { key: 'instFlowerSet', label: 'Complete flower/season set', hint: 'per full 1–4 set' },
+      { key: 'instEightFlowers', label: 'All eight flowers & seasons', hint: 'on top of the two sets' },
     ]},
   ];
 
@@ -59,6 +67,7 @@
     });
     saveRules(rules);
     if (window.__valueRefresh) window.__valueRefresh();
+    if (window.__bonusRefresh) window.__bonusRefresh();
     flashSaved();
   }
 
@@ -66,6 +75,7 @@
     saveRules(Object.assign({}, DEFAULT_RULES));
     build();
     if (window.__valueRefresh) window.__valueRefresh();
+    if (window.__bonusRefresh) window.__bonusRefresh();
     flashSaved();
   }
 

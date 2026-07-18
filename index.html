@@ -25,6 +25,7 @@
       <nav class="modules" id="moduleNav">
         <button data-target="module-efficiency" class="active">1 · Efficiency</button>
         <button data-target="module-value">2 · Value</button>
+        <button data-target="module-bonus">3 · Bonus</button>
         <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
@@ -114,6 +115,51 @@
       </details>
     </section>
 
+    <!-- ============ MODULE 3 — BONUS / ANIMALS ============ -->
+    <section id="module-bonus" hidden>
+      <p class="tagline">Animals &amp; instant payouts — <em>the Singapore signature.</em></p>
+
+      <div class="context-bar" id="b-context" aria-label="Seat"></div>
+
+      <div id="b-tiles" class="hand" role="group" aria-label="Your revealed bonus tiles"></div>
+
+      <p class="prompt">Instant payouts are paid <strong>now, by each opponent</strong> — win or lose.
+      How much do you collect <strong>per opponent</strong>?</p>
+      <div class="tai-choices" id="b-choices" role="group" aria-label="Instant payout estimate"></div>
+
+      <div id="b-feedback" class="feedback" hidden></div>
+
+      <div class="controls">
+        <button id="b-newHand" class="primary">New deal</button>
+        <button id="b-reveal">Reveal</button>
+        <label class="toggle" for="b-difficulty">Difficulty
+          <select id="b-difficulty">
+            <option value="easy">Easy · few triggers</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard · animals &amp; sets</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="session">
+        <span id="b-session">No deals scored yet this session.</span>
+        <button id="b-reset" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>The animal &amp; flower system</summary>
+        <p><strong>Bonus tiles</strong> are set aside (not part of your 4 sets + pair) and replaced with a fresh draw.
+        They give value two ways: <strong>hand tai</strong> (collected only if you win) and <strong>instant payouts</strong>
+        (paid immediately by every opponent the moment they appear — the Singapore signature).</p>
+        <p><strong>Flowers</strong> (Plum 1, Orchid 2, Chrysanthemum 3, Bamboo 4) and <strong>seasons</strong>
+        (Spring 1, Summer 2, Autumn 3, Winter 4) are numbered 1–4. Your <strong>seat number</strong>
+        (East 1, South 2, West 3, North 4) matches one flower and one season — those are “yours”.</p>
+        <p><strong>Animals</strong> 🐱🐭🐓🐛 pay a tai each. The predator–prey pairs
+        <strong>Cat + Rat</strong> and <strong>Rooster + Centipede</strong> each trigger an instant payout; all four pay more still.</p>
+        <p class="note">Every amount is house-dependent — tune them on the ⚙ Rules screen. Instant amounts are per-opponent units.</p>
+      </details>
+    </section>
+
     <!-- ============ RULES EDITOR ============ -->
     <section id="module-rules" hidden>
       <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
@@ -139,6 +185,8 @@
   <script src="src/rules.js"></script>
   <script src="src/scorer.js"></script>
   <script src="src/value.js"></script>
+  <script src="src/bonus.js"></script>
+  <script src="src/bonus-app.js"></script>
   <script src="src/rules-editor.js"></script>
   <script>
     // module navigation

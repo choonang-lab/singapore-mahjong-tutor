@@ -92,6 +92,17 @@ header h1 { margin: 0 0 10px; font-size: 1.5rem; }
 .tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 .tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 
+/* bonus / animal tiles (Module 3) */
+.bonus-tile { position: relative; }
+.animal-tile { font-size: 30px; }             /* emoji animals */
+.own-tile { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
+.own-tile::after {
+  content: 'YOURS'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+  font-size: .52rem; font-weight: 700; letter-spacing: .04em; color: #fff;
+  background: var(--accent); border-radius: 4px; padding: 1px 4px; white-space: nowrap;
+}
+.none-note { color: var(--muted); font-style: italic; padding: 10px 4px; }
+
 /* rules editor */
 .rules-active { color: var(--muted); margin: 0 0 16px; display: flex; align-items: center; gap: 10px; }
 .rules-active strong { color: var(--ink); }

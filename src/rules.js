@@ -35,8 +35,16 @@ const DEFAULT_RULES = {
   smallThreeDragons: 4,  // 小三元 (2 dragon pongs + dragon pair)
   bigThreeDragons: 5,    // 大三元 (3 dragon pongs)
 
-  // --- bonus tiles ---
-  seatFlower: 1, // each flower/season matching your seat (animals: Module 3)
+  // --- bonus tiles: hand tai (counted if you win) ---
+  seatFlower: 1, // each flower/season matching your seat
+  animalTai: 1,  // each animal tile (cat / rat / rooster / centipede)
+
+  // --- instant payouts: paid immediately by EACH opponent on reveal, win or lose ---
+  instAnimalPair: 2,    // completing Cat+Rat or Rooster+Centipede (per pair)
+  instFourAnimals: 4,   // holding all four animals (on top of the two pairs)
+  instOwnFlowers: 2,    // your matching flower AND your matching season together
+  instFlowerSet: 2,     // a complete 4-flower or 4-season set (each set)
+  instEightFlowers: 8,  // all eight flowers & seasons (on top of the two sets)
 };
 
 // --- active-rules store (persisted per device) ---
