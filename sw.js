@@ -1,12 +1,15 @@
 /* Service worker — offline app shell for the Singapore Mahjong Tutor.
  * Bump CACHE when any shell asset changes so clients pick up the new version. */
-const CACHE = 'sgmj-v1';
+const CACHE = 'sgmj-v2';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './src/engine.js',
   './src/app.js',
+  './src/rules.js',
+  './src/scorer.js',
+  './src/value.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

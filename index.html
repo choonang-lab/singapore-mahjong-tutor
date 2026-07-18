@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Singapore Mahjong Tutor — Efficiency Trainer</title>
+  <title>Singapore Mahjong Tutor</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest" />
@@ -21,58 +21,122 @@
 <body>
   <main>
     <header>
-      <h1>🀄 Efficiency Trainer</h1>
-      <p class="tagline">Module 1 · Tile efficiency — <em>which tile do you discard?</em></p>
+      <h1>🀄 Singapore Mahjong Tutor</h1>
+      <nav class="modules" id="moduleNav">
+        <button data-target="module-efficiency" class="active">1 · Efficiency</button>
+        <button data-target="module-value">2 · Value</button>
+      </nav>
     </header>
 
-    <section class="status">
-      <div class="stat"><span class="label">Shanten</span><span id="shanten" class="value">–</span></div>
-      <div class="stat"><span class="label">Streak</span><span id="streak" class="value">0</span></div>
-      <div class="stat"><span class="label">Optimal</span><span id="score" class="value">0 / 0</span></div>
+    <!-- ============ MODULE 1 — EFFICIENCY ============ -->
+    <section id="module-efficiency">
+      <p class="tagline">Tile efficiency — <em>which tile do you discard?</em></p>
+
+      <section class="status">
+        <div class="stat"><span class="label">Shanten</span><span id="shanten" class="value">–</span></div>
+        <div class="stat"><span class="label">Streak</span><span id="streak" class="value">0</span></div>
+        <div class="stat"><span class="label">Optimal</span><span id="score" class="value">0 / 0</span></div>
+      </section>
+
+      <p id="prompt" class="prompt">You just drew a tile. Click the tile you'd <strong>discard</strong> for maximum acceptance.</p>
+
+      <div id="hand" class="hand" role="group" aria-label="Your hand"></div>
+
+      <div id="feedback" class="feedback" hidden></div>
+
+      <div class="controls">
+        <button id="newHand" class="primary">New hand</button>
+        <button id="hint">Show best</button>
+        <label class="toggle" for="difficulty">Difficulty
+          <select id="difficulty">
+            <option value="easy">Easy · closer to ready</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard · early hand</option>
+          </select>
+        </label>
+        <label class="toggle"><input type="checkbox" id="autoNext" /> Auto next on correct</label>
+        <span class="kbd-hint" aria-hidden="true">N new · H hint · Enter next</span>
+      </div>
+
+      <div class="session">
+        <span id="sessionSummary">No hands played yet this session.</span>
+        <button id="resetStats" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>How scoring works</summary>
+        <p><strong>Shanten</strong> = how many tile-swaps from a winning hand (0 = ready to win).
+        <strong>Acceptance (ukeire)</strong> = the number of live tiles that would improve your hand
+        after a discard. The best discard is the one that keeps you at the lowest shanten with the
+        most accepting tiles. Flowers, seasons and animals are bonus tiles and never appear in the hand.</p>
+        <p class="note">v1 uses standard hands only (4 sets + 1 pair) and counts remaining tiles from your
+        hand alone. Opponent discards come in a later module.</p>
+      </details>
     </section>
 
-    <p id="prompt" class="prompt">You just drew a tile. Click the tile you'd <strong>discard</strong> for maximum acceptance.</p>
+    <!-- ============ MODULE 2 — VALUE ============ -->
+    <section id="module-value" hidden>
+      <p class="tagline">Hand value — <em>how many tai is this worth?</em></p>
 
-    <div id="hand" class="hand" role="group" aria-label="Your hand"></div>
+      <div class="context-bar" id="v-context" aria-label="Hand context"></div>
 
-    <div id="feedback" class="feedback" hidden></div>
+      <div id="v-hand" class="hand" role="group" aria-label="Winning hand"></div>
 
-    <div class="controls">
-      <button id="newHand" class="primary">New hand</button>
-      <button id="hint">Show best</button>
-      <label class="toggle" for="difficulty">Difficulty
-        <select id="difficulty">
-          <option value="easy">Easy · closer to ready</option>
-          <option value="medium" selected>Medium</option>
-          <option value="hard">Hard · early hand</option>
-        </select>
-      </label>
-      <label class="toggle"><input type="checkbox" id="autoNext" /> Auto next on correct</label>
-      <span class="kbd-hint" aria-hidden="true">N new · H hint · Enter next</span>
-    </div>
+      <p class="prompt">This is a <strong>winning hand</strong>. Estimate its value, then reveal the breakdown.</p>
+      <div class="tai-choices" id="v-choices" role="group" aria-label="Tai estimate"></div>
 
-    <div class="session">
-      <span id="sessionSummary">No hands played yet this session.</span>
-      <button id="resetStats" class="link" type="button">Reset stats</button>
-    </div>
+      <div id="v-feedback" class="feedback" hidden></div>
 
-    <details class="explainer">
-      <summary>How scoring works</summary>
-      <p><strong>Shanten</strong> = how many tile-swaps from a winning hand (0 = ready to win).
-      <strong>Acceptance (ukeire)</strong> = the number of live tiles that would improve your hand
-      after a discard. The best discard is the one that keeps you at the lowest shanten with the
-      most accepting tiles. Flowers, seasons and animals are bonus tiles and never appear in the hand.</p>
-      <p class="note">v1 uses standard hands only (4 sets + 1 pair) and counts remaining tiles from your
-      hand alone. Opponent discards and house-rule value scoring come in later modules.</p>
-    </details>
+      <div class="controls">
+        <button id="v-newHand" class="primary">New hand</button>
+        <button id="v-reveal">Reveal</button>
+        <label class="toggle" for="v-difficulty">Difficulty
+          <select id="v-difficulty">
+            <option value="easy">Easy · simpler hands</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard · big hands</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="session">
+        <span id="v-session">No hands scored yet this session.</span>
+        <button id="v-reset" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>About tai scoring</summary>
+        <p id="v-rules-note"></p>
+        <p class="note">Tai values are <strong>house-dependent</strong> and fully configurable — this is
+        one common Singapore table. Flowers/seasons add tai here; animals and instant payouts are Module 3.
+        Ping hu uses the common "all sequences + valueless pair" definition.</p>
+      </details>
+    </section>
   </main>
 
   <script src="src/engine.js"></script>
   <script src="src/app.js"></script>
+  <script src="src/rules.js"></script>
+  <script src="src/scorer.js"></script>
+  <script src="src/value.js"></script>
   <script>
+    // module navigation
+    (function () {
+      const nav = document.getElementById('moduleNav');
+      nav.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-target]');
+        if (!btn) return;
+        nav.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('main > section[id^="module-"]').forEach((s) => {
+          s.hidden = (s.id !== btn.dataset.target);
+        });
+        window.scrollTo(0, 0);
+      });
+    })();
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => { /* offline still works after first load fails gracefully */ });
+        navigator.serviceWorker.register('sw.js').catch(() => { /* graceful */ });
       });
     }
   </script>

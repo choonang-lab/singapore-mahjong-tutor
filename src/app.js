@@ -291,6 +291,7 @@ $('difficulty').addEventListener('change', newHand);
 $('resetStats').addEventListener('click', resetStats);
 
 document.addEventListener('keydown', (e) => {
+  if (document.getElementById('module-efficiency').hidden) return;   // only when this module is active
   if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
   const k = e.key.toLowerCase();
   if (k === 'n') { newHand(); }

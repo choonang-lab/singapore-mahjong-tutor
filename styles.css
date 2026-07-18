@@ -54,9 +54,52 @@ main {
   padding-bottom: max(60px, env(safe-area-inset-bottom));
 }
 button, .tile, select, input, summary { touch-action: manipulation; }
-header h1 { margin: 0 0 4px; font-size: 1.6rem; }
+header h1 { margin: 0 0 10px; font-size: 1.5rem; }
 .tagline { margin: 0 0 20px; color: var(--muted); }
 .tagline em { color: var(--ink); font-style: italic; }
+
+/* module nav */
+.modules { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.modules button {
+  font: inherit; font-weight: 600; font-size: .92rem;
+  padding: 8px 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+  box-shadow: none;
+}
+.modules button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.modules button:hover:not(.active) { color: var(--ink); border-color: var(--accent); }
+
+/* context chips (Module 2) */
+.context-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.chip {
+  font-size: .82rem; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 12px;
+}
+.chip strong { color: var(--ink); }
+
+/* tai estimate buttons */
+.tai-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.tai-btn {
+  font: inherit; font-weight: 700; font-size: 1.1rem;
+  min-width: 52px; padding: 10px 0; flex: 1 1 52px; max-width: 90px;
+  border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  box-shadow: var(--shadow); font-variant-numeric: tabular-nums;
+}
+.tai-btn:hover:not(.locked) { border-color: var(--accent); transform: translateY(-2px); }
+.tai-btn.locked { cursor: default; }
+.tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+
+/* score breakdown */
+.breakdown { list-style: none; margin: 8px 0 0; padding: 0; }
+.breakdown li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+.breakdown li:last-child { border-bottom: none; }
+.breakdown .tai { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.breakdown li.sum { margin-top: 4px; border-top: 2px solid var(--line); border-bottom: none; padding-top: 8px; font-weight: 700; }
+.breakdown li.sum .tai { color: var(--ink); }
+.cap-note { font-weight: 400; font-size: .82rem; color: var(--muted); }
 
 .status {
   display: flex;
