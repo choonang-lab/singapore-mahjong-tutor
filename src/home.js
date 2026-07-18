@@ -21,6 +21,10 @@
       const s = read('sgmj-defense-stats-v1');
       return s && s.played ? `${s.played} discard${s.played === 1 ? '' : 's'} · ${pct(s.safe, s.played)}% safe` : null;
     },
+    pushfold: () => {
+      const s = read('sgmj-pushfold-stats-v1');
+      return s && s.played ? `${s.played} call${s.played === 1 ? '' : 's'} · ${pct(s.correct, s.played)}% right` : null;
+    },
   };
 
   function refresh() {

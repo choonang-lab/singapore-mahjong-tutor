@@ -133,6 +133,29 @@ header h1 button:hover { border: none; opacity: .85; }
 .tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 .tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 
+/* push / fold (Module 5) */
+.chip.danger { border-color: var(--bad); color: var(--bad); }
+.chip.danger strong { color: var(--bad); }
+.draw-label { margin: 4px 0 6px; color: var(--muted); font-size: .88rem; }
+.drawn-row { margin-bottom: 18px; }
+.tile.drawn { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
+.pf-choices { display: flex; gap: 12px; margin-bottom: 18px; }
+.pf-btn {
+  flex: 1 1 0; font: inherit; font-weight: 700; font-size: 1.05rem; padding: 16px 0;
+  border-radius: 12px; cursor: pointer; border: 1px solid var(--line); box-shadow: var(--shadow); color: #fff;
+}
+.pf-btn.push { background: var(--accent); border-color: var(--accent); }
+.pf-btn.fold { background: #64748b; border-color: #64748b; }
+.pf-btn:disabled { opacity: .5; cursor: default; }
+.pf-btn.is-best { outline: 3px solid var(--ink); outline-offset: 2px; }
+.ev-calc { margin: 8px 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.ev-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; font-size: .9rem; border-bottom: 1px solid var(--line); }
+.ev-row:last-child { border-bottom: none; }
+.ev-row .tai { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--good); white-space: nowrap; }
+.ev-row .tai.neg { color: var(--bad); }
+.ev-row.sum { font-weight: 700; background: color-mix(in srgb, var(--panel) 60%, transparent); }
+.ev-row.sum .tai { color: var(--ink); }
+
 /* defense (Module 4) */
 .river-label { margin: 0 0 8px; color: var(--muted); font-size: .9rem; }
 .river-hint { font-size: .8rem; }

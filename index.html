@@ -28,6 +28,7 @@
         <button data-target="module-value">2 · Value</button>
         <button data-target="module-bonus">3 · Bonus</button>
         <button data-target="module-defense">4 · Defense</button>
+        <button data-target="module-pushfold">5 · Push/Fold</button>
         <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
@@ -42,6 +43,7 @@
         <li><span class="path-n">2</span> Know what a hand is worth</li>
         <li><span class="path-n">3</span> Cash in animals &amp; flowers</li>
         <li><span class="path-n">4</span> Don't feed the other players</li>
+        <li><span class="path-n">5</span> Weigh it all: push or fold</li>
       </ol>
 
       <div class="home-cards" id="homeCards">
@@ -75,6 +77,14 @@
             <span class="hc-title">Defense <span class="hc-tag">safety</span></span>
             <span class="hc-desc">Which tile is safe to discard — genbutsu &amp; suji reading.</span>
             <span class="hc-progress" data-stat="defense">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-pushfold">
+          <span class="hc-num">5</span>
+          <span class="hc-body">
+            <span class="hc-title">Push / Fold <span class="hc-tag">capstone</span></span>
+            <span class="hc-desc">Weigh value against danger — is this hand worth the risk?</span>
+            <span class="hc-progress" data-stat="pushfold">Not started</span>
           </span>
         </button>
       </div>
@@ -255,6 +265,56 @@
       </details>
     </section>
 
+    <!-- ============ MODULE 5 — PUSH / FOLD ============ -->
+    <section id="module-pushfold" hidden>
+      <p class="tagline">Push or fold — <em>is this hand worth the risk?</em></p>
+
+      <div class="context-bar" id="p-yours" aria-label="Your hand"></div>
+      <div class="context-bar" id="p-threat" aria-label="Opponent threat"></div>
+
+      <div id="p-hand" class="hand" role="group" aria-label="Your tenpai hand"></div>
+      <p class="draw-label">You just drew — discarding it keeps your wait:</p>
+      <div id="p-drawn" class="hand drawn-row" aria-label="Drawn tile"></div>
+
+      <p class="river-label">Opponent's discards <span class="river-hint">(judge how dangerous the drawn tile is)</span></p>
+      <div id="p-river" class="river" role="group" aria-label="Opponent's discards"></div>
+
+      <p class="prompt">Do you <strong>push</strong> (throw the drawn tile to keep your hand) or <strong>fold</strong> (give up and play safe)?</p>
+      <div class="pf-choices">
+        <button id="p-push" class="pf-btn push">Push ▶</button>
+        <button id="p-fold" class="pf-btn fold">Fold ✋</button>
+      </div>
+
+      <div id="p-feedback" class="feedback" hidden></div>
+
+      <div class="controls">
+        <button id="p-newDeal" class="primary">New deal</button>
+        <label class="toggle" for="p-difficulty">Difficulty
+          <select id="p-difficulty">
+            <option value="easy">Easy · clearer calls</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard · closer calls</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="session">
+        <span id="p-session">No decisions played yet this session.</span>
+        <button id="p-reset" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>How the call is scored</summary>
+        <p>The capstone: weigh <strong>your hand</strong> (Module 2 value + how close you are) against
+        <strong>the opponent's threat</strong> (Module 4 danger). The model compares two expected values:</p>
+        <p><strong>Push EV</strong> = P(you win) × your tai − P(deal in) × opponent's tai. &nbsp;<strong>Fold EV</strong> = 0.
+        Push when Push EV is positive.</p>
+        <p class="note">This is an intuition-builder, not an exact solver — real push/fold plays out over several turns,
+        and you'd estimate West's value rather than know it. It also separates <strong>decision from outcome</strong>:
+        a +EV push that happens to deal in was still the right call.</p>
+      </details>
+    </section>
+
     <!-- ============ RULES EDITOR ============ -->
     <section id="module-rules" hidden>
       <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
@@ -284,6 +344,8 @@
   <script src="src/bonus-app.js"></script>
   <script src="src/defense.js"></script>
   <script src="src/defense-app.js"></script>
+  <script src="src/pushfold.js"></script>
+  <script src="src/pushfold-app.js"></script>
   <script src="src/rules-editor.js"></script>
   <script src="src/home.js"></script>
   <script>
