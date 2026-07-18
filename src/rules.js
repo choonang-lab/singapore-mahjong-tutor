@@ -14,7 +14,7 @@ const DEFAULT_RULES = {
   note: 'Typical home / kopitiam rules. Every value is house-dependent — edit freely.',
 
   limit: 5,      // tai cap (满)
-  minTai: 0,     // minimum tai to win
+  minTai: 1,     // minimum tai to win — 1 means a no-tai (chicken) hand cannot win
 
   // --- situational ---
   zimo: 1,       // self-draw 自摸
@@ -39,6 +39,22 @@ const DEFAULT_RULES = {
   seatFlower: 1, // each flower/season matching your seat (animals: Module 3)
 };
 
+// --- active-rules store (persisted per device) ---
+const RULES_KEY = 'sgmj-rules-v1';
+
+function loadRules() {
+  try {
+    const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(RULES_KEY) : null;
+    return Object.assign({}, DEFAULT_RULES, JSON.parse(raw || 'null') || {});
+  } catch {
+    return Object.assign({}, DEFAULT_RULES);
+  }
+}
+
+function saveRules(rules) {
+  try { localStorage.setItem(RULES_KEY, JSON.stringify(rules)); } catch { /* ignore */ }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { DEFAULT_RULES };
+  module.exports = { DEFAULT_RULES, loadRules, saveRules, RULES_KEY };
 }

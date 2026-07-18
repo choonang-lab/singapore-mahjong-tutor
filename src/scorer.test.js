@@ -29,7 +29,11 @@ const ctxE = { seatWind: 0, roundWind: 0, selfDraw: false }; // East seat, East 
 // 1) chicken hand: 3 chows + a non-value pong + pair, mixed suits, no value
 let r = scoreHand(toCounts('123m 456m 789m 111p 99s'), ctxE, R);
 eq('chicken total', r.total, 0);
-eq('chicken valid (minTai 0)', r.valid, true);
+eq('chicken cannot win (minTai 1)', r.valid, false);   // default minTai=1
+// a 1-tai hand IS a legal win
+r = scoreHand(toCounts('123m 456m 789m 123p 55s'), ctxE, R); // all chows, valueless pair -> ping hu (1)
+eq('one-tai hand valid', r.valid, true);
+eq('one-tai is ping hu', r.total, R.pinghu);
 
 // 2) all pongs, mixed suits
 r = scoreHand(toCounts('111m 999m 111p 999p 55s'), ctxE, R);

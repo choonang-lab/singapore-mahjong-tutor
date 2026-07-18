@@ -25,6 +25,7 @@
       <nav class="modules" id="moduleNav">
         <button data-target="module-efficiency" class="active">1 · Efficiency</button>
         <button data-target="module-value">2 · Value</button>
+        <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
 
@@ -112,6 +113,25 @@
         Ping hu uses the common "all sequences + valueless pair" definition.</p>
       </details>
     </section>
+
+    <!-- ============ RULES EDITOR ============ -->
+    <section id="module-rules" hidden>
+      <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
+      <p class="rules-active">Editing <strong id="rules-name"></strong><span id="rules-saved" class="saved-flag">Saved ✓</span></p>
+
+      <div id="rules-form" class="rules-form"></div>
+
+      <div class="controls">
+        <button id="rules-reset" class="link" type="button">Reset to defaults</button>
+      </div>
+
+      <details class="explainer">
+        <summary>Notes</summary>
+        <p class="note">Changes apply to the <strong>Value</strong> trainer immediately and are saved on this device.
+        By default the <strong>minimum tai to win is 1</strong>, so a no-tai (chicken) hand cannot win — set it to 0 to allow chicken hands.
+        Every value is house-dependent; tai are summed then capped at the limit.</p>
+      </details>
+    </section>
   </main>
 
   <script src="src/engine.js"></script>
@@ -119,6 +139,7 @@
   <script src="src/rules.js"></script>
   <script src="src/scorer.js"></script>
   <script src="src/value.js"></script>
+  <script src="src/rules-editor.js"></script>
   <script>
     // module navigation
     (function () {

@@ -2,7 +2,7 @@
  * Depends on globals: scoreHand (scorer.js), DEFAULT_RULES (rules.js).
  * Wrapped in an IIFE so its locals never collide with app.js globals. */
 (function () {
-  const RULES = DEFAULT_RULES;
+  let RULES = loadRules();   // active (possibly edited) rules; refreshed each new hand
   const $ = (id) => document.getElementById(id);
 
   // ---- tiles ----
@@ -67,12 +67,14 @@
   }
 
   function accept(difficulty, total, capped) {
-    if (difficulty === 'easy') return total <= 2;
+    if (total < RULES.minTai) return false;         // must be a legal win under active rules
+    if (difficulty === 'easy') return total <= Math.max(2, RULES.minTai);
     if (difficulty === 'hard') return total >= 3;
     return true;
   }
 
   function newHand() {
+    RULES = loadRules();                            // pick up any edits from the Rules screen
     const difficulty = $('v-difficulty').value;
     for (let attempt = 0; attempt < 500; attempt++) {
       const c = tryBuild(difficulty);
@@ -86,11 +88,15 @@
       render();
       return;
     }
-    // fallback: accept any valid win
+    // fallback: any hand that is a legal win under the active rules
     let c; let context; let res;
-    do { c = tryBuild(difficulty); } while (!c);
-    context = genContext(difficulty);
-    res = scoreHand(c, context, RULES);
+    for (let n = 0; n < 500; n++) {
+      c = tryBuild(difficulty);
+      if (!c) continue;
+      context = genContext(difficulty);
+      res = scoreHand(c, context, RULES);
+      if (res.isWin && res.total >= RULES.minTai) break;
+    }
     hand = c; ctx = context; result = res; answered = false; render();
   }
 
@@ -176,7 +182,10 @@
 
     let html = `<h3>${isRight ? '✓ Correct' : '✗ Not quite'} — worth <strong>${result.capped} tai</strong>${capNote}</h3>`;
     if (result.items.length === 0) {
-      html += `<div class="row note">A chicken hand (鸡胡) — no scoring elements, worth 0 tai. Still a legal win here.</div>`;
+      const legal = RULES.minTai === 0
+        ? ' Still a legal win here.'
+        : ` Under these rules it <strong>cannot win</strong> (needs at least ${RULES.minTai} tai).`;
+      html += `<div class="row note">A chicken hand (鸡胡) — no scoring elements, worth 0 tai.${legal}</div>`;
     } else {
       html += '<ul class="breakdown">' +
         result.items.map((it) => `<li><span>${it.name}</span><span class="tai">+${it.tai}</span></li>`).join('') +
@@ -222,5 +231,6 @@
     } else if ((e.key === 'Enter' || e.key === ' ') && answered) { e.preventDefault(); newHand(); }
   });
 
+  window.__valueRefresh = newHand;   // let the Rules editor re-render after changes
   newHand();
 })();
