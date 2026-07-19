@@ -36,5 +36,12 @@ eq('near-flush wins some', near.winRate > 0.1, true);
 // winning flushes score at least the full-flush tai
 eq('flush wins are valuable (>=4 tai mean)', near.meanTai >= 4, true);
 
+// standard error: finite, non-negative, and shrinks ~1/sqrt(N)
+const small = runRollouts(toCounts('123s 456s 78s 9s 2s 5s 1m 3p'), { suit: 2, honors: false }, R, 8, 1000, 3);
+const big = runRollouts(toCounts('123s 456s 78s 9s 2s 5s 1m 3p'), { suit: 2, honors: false }, R, 8, 9000, 3);
+eq('evSE finite & >= 0', Number.isFinite(small.evSE) && small.evSE >= 0, true);
+eq('evSE shrinks with more rollouts', big.evSE < small.evSE, true);
+eq('evSE roughly halves at ~9x N', small.evSE / big.evSE > 2 && small.evSE / big.evSE < 4, true);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

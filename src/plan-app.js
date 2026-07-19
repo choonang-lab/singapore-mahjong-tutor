@@ -135,8 +135,12 @@
     $('pl-mc-btn').addEventListener('click', runMC);
   }
 
-  // ---- Monte Carlo (tier 3): fast enough (~40ms) to run inline on the main thread ----
-  const N_ROLLOUTS = 1500;
+  // ---- Monte Carlo (tier 3): fast enough (~150ms) to run inline on the main thread ----
+  const N_SCREEN = 1500;    // cheap first pass over all four directions
+  const N_REFINE = 6000;    // extra samples poured into the contenders only
+  const Z = 1.96;           // 95% confidence
+  const half = (r) => Z * r.evSE;   // 95% interval half-width on EV
+
   function runMC() {
     const btn = $('pl-mc-btn');
     if (!btn || btn.disabled) return;
@@ -150,33 +154,44 @@
         { type: 'halfFlush', opts: { suit, honors: true } },
         { type: 'allPongs', opts: { chow: false } },
       ];
+      // stage 1 — screen all directions cheaply
       const res = {};
-      for (const s of specs) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_ROLLOUTS, 20240719);
-      renderMC(res, specs);
+      for (const s of specs) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_SCREEN, 20240719);
+      // contenders = anything whose 95% interval reaches the leader's lower bound
+      const topEv = Math.max(...specs.map((s) => res[s.type].evMC));
+      const leaderLow = topEv - Z * Math.max(...specs.filter((s) => res[s.type].evMC === topEv).map((s) => res[s.type].evSE));
+      const contenders = specs.filter((s) => res[s.type].evMC + half(res[s.type]) >= leaderLow);
+      // stage 2 — refine only the contenders with more samples
+      for (const s of contenders) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_REFINE, 987654321);
+      renderMC(res, specs, new Set(contenders.map((c) => c.type)));
     }, 20);
   }
 
-  function renderMC(res, specs) {
+  function renderMC(res, specs, contenderTypes) {
     const ranked = specs.map((s) => ({ type: s.type, ...res[s.type] })).sort((a, b) => b.evMC - a.evMC);
-    const mcBest = ranked[0].type;
+    const top = ranked[0];
     const analyticBest = plans[0].type;
+    // co-leaders: not statistically distinguishable from the top (diff within 95% CI of the difference)
+    const leaders = ranked.filter((r) => (top.evMC - r.evMC) <= Z * Math.sqrt(top.evSE ** 2 + r.evSE ** 2));
+    const leaderSet = new Set(leaders.map((l) => l.type));
+    const clear = leaders.length === 1;
 
-    let html = `<div class="mc-block"><div class="mc-head">Monte Carlo · ${N_ROLLOUTS} rollouts <span>— real win rate &amp; value spread</span></div><div class="mc-rows">`;
+    let html = `<div class="mc-block"><div class="mc-head">Monte Carlo <span>— real win rate, value spread &amp; 95% interval</span></div><div class="mc-rows">`;
     for (const r of ranked) {
-      html += `<div class="mc-row${r.type === mcBest ? ' best' : ''}">` +
+      html += `<div class="mc-row${leaderSet.has(r.type) ? ' best' : ''}">` +
         `<span class="mc-dir">${LABELS[r.type]}</span>` +
         `<span class="mc-num">${Math.round(r.winRate * 100)}% win</span>` +
         `<span class="mc-num">${r.meanTai.toFixed(1)} avg tai</span>` +
-        `<span class="mc-num ev">EV ${r.evMC.toFixed(2)}</span></div>`;
+        `<span class="mc-num ev">EV ${r.evMC.toFixed(2)} <span class="mc-ci">±${half(r).toFixed(2)}</span></span></div>`;
     }
     html += `</div>`;
 
-    // tai histogram for the MC-best direction
-    const hist = ranked[0].hist;
+    // tai histogram for the top direction
+    const hist = top.hist;
     const keys = Object.keys(hist).map(Number).sort((a, b) => a - b);
     if (keys.length) {
       const max = Math.max(...keys.map((k) => hist[k]));
-      html += `<div class="mc-hist"><div class="mc-hist-label">Tai when ${LABELS[mcBest]} wins:</div>`;
+      html += `<div class="mc-hist"><div class="mc-hist-label">Tai when ${LABELS[top.type]} wins:</div>`;
       for (const k of keys) {
         html += `<div class="hbar"><span class="hbar-k">${k} tai</span>` +
           `<span class="hbar-track"><span class="hbar-fill" style="width:${(hist[k] / max) * 100}%"></span></span>` +
@@ -185,14 +200,22 @@
       html += `</div>`;
     }
 
-    html += `<div class="row note">${mcBest === analyticBest
-      ? `Monte Carlo <strong>agrees</strong> the best direction is <strong>${LABELS[mcBest]}</strong> — now with a real win rate and the actual spread of tai.`
-      : `Monte Carlo recommends <strong>${LABELS[mcBest]}</strong>, not the analytic pick <strong>${LABELS[analyticBest]}</strong>. The analytic model overrates a wide-but-cheap hand's win rate; trust the simulation.`}
-      No opponents are modelled, so absolute win rates are a little optimistic — but the comparison is sound.</div></div>`;
+    // verdict
+    let verdict;
+    if (clear) {
+      verdict = top.type === analyticBest
+        ? `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field — and it agrees with the analytic pick.`
+        : `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field (the analytic pick was <strong>${LABELS[analyticBest]}</strong> — that model overrates wide-but-cheap hands).`;
+    } else {
+      const names = leaders.map((l) => `<strong>${LABELS[l.type]}</strong>`).join(', ');
+      verdict = `<strong>Too close to call.</strong> ${names} are within the simulation's margin of error — any is a fine choice here; let defense and what your opponents are showing decide.`;
+    }
+    html += `<div class="row note">${verdict}</div>`;
+    html += `<div class="row note method">Screened 4 directions at ${N_SCREEN.toLocaleString()} rollouts, refined the contenders to ${N_REFINE.toLocaleString()}. <strong>±</strong> is the 95% interval; overlapping intervals can't be separated. Absolute rates are optimistic (no opponents modelled) — trust the comparison, not the decimals.</div></div>`;
 
     $('pl-mc').innerHTML = html;
     const btn = $('pl-mc-btn');
-    if (btn) btn.textContent = `✓ Simulated · ${N_ROLLOUTS} rollouts`;
+    if (btn) btn.textContent = '✓ Simulated';
   }
 
   function resetStats() { stats = fresh(); streak = 0; save(); renderSession(); }

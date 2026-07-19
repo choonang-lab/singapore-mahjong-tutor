@@ -114,20 +114,25 @@ function rollout(start, opts, rules, draws, rng) {
 }
 
 /**
- * Run N rollouts for one plan. Returns
- *   { n, wins, winRate, meanTai, evMC, hist: {tai: count, ...} }
+ * Run N rollouts for one plan. Each rollout contributes x = tai if it wins,
+ * else 0; EV is the mean of x, so its standard error is sd(x)/sqrt(N) — a
+ * proper per-run confidence measure with no need for repeated seeds.
+ * Returns { n, wins, winRate, meanTai, evMC, evSE, hist }.
  */
 function runRollouts(hand, opts, rules, draws, n, seed) {
   const rng = mulberry32(seed);
-  let wins = 0, taiSum = 0;
+  let wins = 0, taiSum = 0, taiSqSum = 0;
   const hist = {};
   for (let k = 0; k < n; k++) {
     const r = rollout(hand, opts, rules, draws, rng);
-    if (r.win) { wins++; taiSum += r.tai; hist[r.tai] = (hist[r.tai] || 0) + 1; }
+    if (r.win) { wins++; taiSum += r.tai; taiSqSum += r.tai * r.tai; hist[r.tai] = (hist[r.tai] || 0) + 1; }
   }
   const winRate = wins / n;
   const meanTai = wins ? taiSum / wins : 0;
-  return { n, wins, winRate, meanTai, evMC: winRate * meanTai, hist };
+  const evMC = taiSum / n;                                   // mean of x over all n rollouts
+  const varX = Math.max(0, taiSqSum / n - evMC * evMC);       // 0-contributions are already in taiSqSum
+  const evSE = Math.sqrt(varX / n);
+  return { n, wins, winRate, meanTai, evMC, evSE, hist };
 }
 
 if (typeof module !== 'undefined' && module.exports) {
