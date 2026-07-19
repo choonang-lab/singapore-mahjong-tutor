@@ -1,4 +1,4 @@
-const { shanten, ukeire, bestDiscards, waits, totalTiles } = require('./engine');
+const { shanten, ukeire, bestDiscards, waits, shantenConstrained, ukeireConstrained, totalTiles } = require('./engine');
 
 // Helpers to build hands from a compact string like "123m 456m 789m 123p 55p"
 function toCounts(str) {
@@ -60,6 +60,23 @@ const suitName = ['m','p','s'];
 function tileName(i){ if(i<27){return (i%9+1)+suitName[Math.floor(i/9)];} return ['E','S','W','N','Rd','Gr','Wh'][i-27]; }
 eq('best discard is 9s (float)', tileName(best.discard), '9s');
 eq('after best discard hand is complete/tenpai', best.shanten <= 0, true);
+
+// ---- constrained shanten ----
+// default opts reproduce plain shanten
+eq('constrained default == shanten', shantenConstrained(toCounts('123m 456m 789m 12p 46p'), {}), shanten(toCounts('123m 456m 789m 12p 46p')));
+// full flush: 3 man melds + 4m single + 123p floaters -> 2 away from man full flush
+eq('full flush shanten', shantenConstrained(toCounts('111m 222m 333m 4m 123p'), { suit: 0, honors: false }), 2);
+// half flush lets honours help: same tiles, but with a dragon pair instead of pin
+eq('half flush uses honours', shantenConstrained(toCounts('111m 222m 333m 4m 4m rr'), { suit: 0, honors: true }), 0);
+// all-pongs: 3 pongs + a pair + 2 singles -> 1-shanten toward toitoi
+eq('all-pongs shanten', shantenConstrained(toCounts('111m 222p 333s 44m 5s 9p'), { chow: false }), 1);
+// all-pongs does NOT count a run: 123m 456m 789m 11p 2p3p is far from toitoi
+eq('all-pongs ignores runs', shantenConstrained(toCounts('123m 456m 789m 11p 2p'), { chow: false }) > shanten(toCounts('123m 456m 789m 11p 2p')), true);
+// a clean one-suit tenpai is 0 toward full flush
+eq('full flush tenpai', shantenConstrained(toCounts('123s 234s 345s 456s 9s'), { suit: 2, honors: false }), 0);
+// ukeire toward full flush only counts that suit
+const ufc = ukeireConstrained(toCounts('111m 222m 333m 4m 123p'), { suit: 0, honors: false });
+eq('flush ukeire tiles are all man', ufc.tiles.every((t) => t.index < 9), true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

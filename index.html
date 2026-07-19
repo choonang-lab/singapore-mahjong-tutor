@@ -29,6 +29,7 @@
         <button data-target="module-bonus">3 · Bonus</button>
         <button data-target="module-defense">4 · Defense</button>
         <button data-target="module-pushfold">5 · Push/Fold</button>
+        <button data-target="module-plan">6 · Plan</button>
         <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
@@ -44,6 +45,7 @@
         <li><span class="path-n">3</span> Cash in animals &amp; flowers</li>
         <li><span class="path-n">4</span> Don't feed the other players</li>
         <li><span class="path-n">5</span> Weigh it all: push or fold</li>
+        <li><span class="path-n">6</span> Pick the highest-EV hand to chase</li>
       </ol>
 
       <div class="home-cards" id="homeCards">
@@ -85,6 +87,14 @@
             <span class="hc-title">Push / Fold <span class="hc-tag">capstone</span></span>
             <span class="hc-desc">Weigh value against danger — is this hand worth the risk?</span>
             <span class="hc-progress" data-stat="pushfold">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-plan">
+          <span class="hc-num">6</span>
+          <span class="hc-body">
+            <span class="hc-title">Best Plan <span class="hc-tag">EV</span></span>
+            <span class="hc-desc">Which hand to go for — expected value across directions.</span>
+            <span class="hc-progress" data-stat="plan">Not started</span>
           </span>
         </button>
       </div>
@@ -315,6 +325,50 @@
       </details>
     </section>
 
+    <!-- ============ MODULE 6 — BEST PLAN ============ -->
+    <section id="module-plan" hidden>
+      <p class="tagline">Best plan — <em>which hand should you go for?</em></p>
+
+      <div class="context-bar" id="pl-context" aria-label="Turn"></div>
+
+      <div id="pl-hand" class="hand" role="group" aria-label="Your hand"></div>
+
+      <p class="prompt">Given this hand, which <strong>direction</strong> gives the best expected value?</p>
+      <div class="plan-choices" id="pl-choices" role="group" aria-label="Plan choices"></div>
+
+      <div id="pl-feedback" class="feedback" hidden></div>
+
+      <div class="controls">
+        <button id="pl-newDeal" class="primary">New hand</button>
+        <label class="toggle" for="pl-difficulty">Turn
+          <select id="pl-difficulty">
+            <option value="easy">Early · many draws</option>
+            <option value="medium" selected>Mid-hand</option>
+            <option value="hard">Late · few draws</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="session">
+        <span id="pl-session">No hands played yet this session.</span>
+        <button id="pl-reset" class="link" type="button">Reset stats</button>
+      </div>
+
+      <details class="explainer">
+        <summary>How the best plan is chosen</summary>
+        <p>Every candidate direction is scored by <strong>expected value</strong>:
+        <strong>EV ≈ win-chance × value</strong>. Win-chance comes from how far you are
+        (<em>shanten toward that hand type</em>) and how many tiles advance you (<em>acceptance</em>),
+        over the draws left. Value is the plan's characteristic tai plus any honours you already hold.</p>
+        <p>The tension: a <strong>full flush</strong> is worth a lot but is usually further away and narrower;
+        the <strong>fastest</strong> hand wins often but cheaply. Early in the hand, value wins; late, speed wins —
+        try the same hand at different turns.</p>
+        <p class="note">This is the analytic estimate (instant, offline). The win-chance model reuses current
+        acceptance for every step, so it slightly overrates deep hands; a Monte-Carlo pass would refine the win
+        rate and reveal the full spread of possible tai. Defense (deal-in risk) is a separate layer — see Push/Fold.</p>
+      </details>
+    </section>
+
     <!-- ============ RULES EDITOR ============ -->
     <section id="module-rules" hidden>
       <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
@@ -346,6 +400,8 @@
   <script src="src/defense-app.js"></script>
   <script src="src/pushfold.js"></script>
   <script src="src/pushfold-app.js"></script>
+  <script src="src/plan.js"></script>
+  <script src="src/plan-app.js"></script>
   <script src="src/rules-editor.js"></script>
   <script src="src/home.js"></script>
   <script>

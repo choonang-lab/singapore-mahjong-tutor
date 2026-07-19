@@ -25,6 +25,10 @@
       const s = read('sgmj-pushfold-stats-v1');
       return s && s.played ? `${s.played} call${s.played === 1 ? '' : 's'} · ${pct(s.correct, s.played)}% right` : null;
     },
+    plan: () => {
+      const s = read('sgmj-plan-stats-v1');
+      return s && s.played ? `${s.played} hand${s.played === 1 ? '' : 's'} · ${pct(s.correct, s.played)}% right` : null;
+    },
   };
 
   function refresh() {

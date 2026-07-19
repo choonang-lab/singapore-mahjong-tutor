@@ -133,6 +133,73 @@ function bestDiscards(counts, seen) {
 }
 
 /**
+ * Constrained shanten — how far the hand is from a winning hand of a specific
+ * TYPE. Same decomposition search, but the allowed melds are pruned:
+ *   opts.suit   : 0/1/2 to require that suit only (flush), or null for any suit
+ *   opts.honors : whether honour tiles may form sets (false for a full flush)
+ *   opts.chow   : whether sequences are allowed (false for all-pongs / 对对胡)
+ * Disallowed tiles simply act as floaters to be discarded.
+ * Defaults (all suits, honours, chows) reproduce plain shanten().
+ */
+function shantenConstrained(counts, opts) {
+  const suit = (opts && opts.suit !== undefined) ? opts.suit : null;
+  const honors = !opts || opts.honors !== false;
+  const chow = !opts || opts.chow !== false;
+  const allowed = (i) => (i >= 27 ? honors : (suit === null || Math.floor(i / 9) === suit));
+
+  const t = counts.slice();
+  let best = 8;
+
+  function dec(i, m, part, hasPair) {
+    while (i < NUM_TYPES && (t[i] === 0 || !allowed(i))) i++;   // skip empties + disallowed (floaters)
+    if (i === NUM_TYPES) {
+      let mp = m + part;
+      if (mp > 4) part -= (mp - 4);
+      const sh = 8 - 2 * m - part - (hasPair ? 1 : 0);
+      if (sh < best) best = sh;
+      return;
+    }
+    if (t[i] >= 3) { t[i] -= 3; dec(i, m + 1, part, hasPair); t[i] += 3; }
+    if (chow && i < 27 && suitPos(i) <= 6 && allowed(i + 1) && allowed(i + 2) && t[i + 1] > 0 && t[i + 2] > 0) {
+      t[i]--; t[i + 1]--; t[i + 2]--; dec(i, m + 1, part, hasPair); t[i]++; t[i + 1]++; t[i + 2]++;
+    }
+    if (t[i] >= 2) {
+      if (!hasPair) { t[i] -= 2; dec(i, m, part, true); t[i] += 2; }
+      t[i] -= 2; dec(i, m, part + 1, hasPair); t[i] += 2;
+    }
+    if (chow && i < 27 && suitPos(i) <= 7 && allowed(i + 1) && t[i + 1] > 0) {
+      t[i]--; t[i + 1]--; dec(i, m, part + 1, hasPair); t[i]++; t[i + 1]++;
+    }
+    if (chow && i < 27 && suitPos(i) <= 6 && allowed(i + 2) && t[i + 2] > 0) {
+      t[i]--; t[i + 2]--; dec(i, m, part + 1, hasPair); t[i]++; t[i + 2]++;
+    }
+    t[i]--; dec(i, m, part, hasPair); t[i]++;
+  }
+
+  dec(0, 0, 0, false);
+  return best;
+}
+
+/** Tile acceptance toward a constrained target (see shantenConstrained). */
+function ukeireConstrained(counts, opts, seen) {
+  const base = shantenConstrained(counts, opts);
+  const visible = seen || counts;
+  const tiles = [];
+  let total = 0;
+  for (let i = 0; i < NUM_TYPES; i++) {
+    if (counts[i] >= 4) continue;
+    counts[i]++;
+    const after = shantenConstrained(counts, opts);
+    counts[i]--;
+    if (after < base) {
+      const rem = Math.max(0, 4 - visible[i]);
+      if (rem > 0) { tiles.push({ index: i, remaining: rem }); total += rem; }
+    }
+  }
+  return { shanten: base, tiles, total };
+}
+
+/**
  * Winning tiles for a 13-tile tenpai hand: every tile type that completes it.
  * Returns an array of tile indices (empty if the hand is not tenpai).
  */
@@ -148,5 +215,5 @@ function waits(counts) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { shanten, ukeire, bestDiscards, waits, totalTiles, NUM_TYPES };
+  module.exports = { shanten, ukeire, bestDiscards, waits, shantenConstrained, ukeireConstrained, totalTiles, NUM_TYPES };
 }

@@ -133,6 +133,27 @@ header h1 button:hover { border: none; opacity: .85; }
 .tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 .tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 
+/* best plan (Module 6) */
+.plan-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.plan-btn {
+  font: inherit; font-weight: 700; font-size: 1rem; padding: 14px 12px; border-radius: 12px;
+  cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); box-shadow: var(--shadow);
+}
+.plan-btn:hover:not(.locked) { border-color: var(--accent); transform: translateY(-2px); }
+.plan-btn.locked { cursor: default; }
+.plan-btn.is-best { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.plan-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.plan-table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: .88rem; }
+.plan-table th { text-align: right; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 4px 6px; font-weight: 700; }
+.plan-table th:first-child { text-align: left; }
+.plan-table td { text-align: right; padding: 6px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.plan-table td:first-child { text-align: left; font-weight: 600; }
+.plan-table td.ev { font-weight: 800; color: var(--accent); }
+.plan-table tr.best td { background: var(--good-bg); }
+.plan-table tr.best td.ev { color: var(--good); }
+.plan-table tr.chosen td { box-shadow: inset 2px 0 0 var(--bad); }
+.suit-tag { font-size: .7rem; color: var(--muted); text-transform: uppercase; }
+
 /* push / fold (Module 5) */
 .chip.danger { border-color: var(--bad); color: var(--bad); }
 .chip.danger strong { color: var(--bad); }
@@ -365,6 +386,8 @@ button.link:hover { border: none; }
   .rules-form { grid-template-columns: 1fr; }
   .home-cards { grid-template-columns: 1fr; }
   .hero { font-size: 1rem; }
+  .plan-table { font-size: .8rem; }
+  .plan-table th, .plan-table td { padding: 5px 4px; }
 }
 
 /* give a touch of extra top space when installed as a standalone app */
