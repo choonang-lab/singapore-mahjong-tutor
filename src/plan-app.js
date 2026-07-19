@@ -129,8 +129,70 @@
         `<td>${p.shanten}</td><td>${p.ukeire}</td><td>${p.value} tai</td><td>${pctStr(p.pWin)}</td><td class="ev">${p.ev.toFixed(2)}</td></tr>`;
     }
     html += `</tbody></table>`;
-    html += `<div class="row note">EV ≈ win-chance × value. Win-chance comes from shanten &amp; acceptance over ~${draws} draws; value is the plan's characteristic tai plus honours you already hold. Approximate — a Monte-Carlo pass would sharpen the win rate and show the full tai spread.</div>`;
+    html += `<div class="row note">EV ≈ win-chance × value. Win-chance comes from shanten &amp; acceptance over ~${draws} draws; value is the plan's characteristic tai plus honours you already hold. This is the analytic estimate — run the simulation below to sharpen it.</div>`;
+    html += `<button id="pl-mc-btn" class="mc-run" type="button">▶ Run Monte Carlo — real win rates &amp; tai spread</button><div id="pl-mc"></div>`;
     fb.innerHTML = html;
+    $('pl-mc-btn').addEventListener('click', runMC);
+  }
+
+  // ---- Monte Carlo (tier 3): fast enough (~40ms) to run inline on the main thread ----
+  const N_ROLLOUTS = 1500;
+  function runMC() {
+    const btn = $('pl-mc-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true; btn.textContent = 'Simulating…';
+    setTimeout(() => {
+      const rules = loadRules();
+      const suit = (plans.find((p) => p.suit != null) || {}).suit ?? 0;
+      const specs = [
+        { type: 'fastest', opts: {} },
+        { type: 'fullFlush', opts: { suit, honors: false } },
+        { type: 'halfFlush', opts: { suit, honors: true } },
+        { type: 'allPongs', opts: { chow: false } },
+      ];
+      const res = {};
+      for (const s of specs) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_ROLLOUTS, 20240719);
+      renderMC(res, specs);
+    }, 20);
+  }
+
+  function renderMC(res, specs) {
+    const ranked = specs.map((s) => ({ type: s.type, ...res[s.type] })).sort((a, b) => b.evMC - a.evMC);
+    const mcBest = ranked[0].type;
+    const analyticBest = plans[0].type;
+
+    let html = `<div class="mc-block"><div class="mc-head">Monte Carlo · ${N_ROLLOUTS} rollouts <span>— real win rate &amp; value spread</span></div><div class="mc-rows">`;
+    for (const r of ranked) {
+      html += `<div class="mc-row${r.type === mcBest ? ' best' : ''}">` +
+        `<span class="mc-dir">${LABELS[r.type]}</span>` +
+        `<span class="mc-num">${Math.round(r.winRate * 100)}% win</span>` +
+        `<span class="mc-num">${r.meanTai.toFixed(1)} avg tai</span>` +
+        `<span class="mc-num ev">EV ${r.evMC.toFixed(2)}</span></div>`;
+    }
+    html += `</div>`;
+
+    // tai histogram for the MC-best direction
+    const hist = ranked[0].hist;
+    const keys = Object.keys(hist).map(Number).sort((a, b) => a - b);
+    if (keys.length) {
+      const max = Math.max(...keys.map((k) => hist[k]));
+      html += `<div class="mc-hist"><div class="mc-hist-label">Tai when ${LABELS[mcBest]} wins:</div>`;
+      for (const k of keys) {
+        html += `<div class="hbar"><span class="hbar-k">${k} tai</span>` +
+          `<span class="hbar-track"><span class="hbar-fill" style="width:${(hist[k] / max) * 100}%"></span></span>` +
+          `<span class="hbar-n">${hist[k]}</span></div>`;
+      }
+      html += `</div>`;
+    }
+
+    html += `<div class="row note">${mcBest === analyticBest
+      ? `Monte Carlo <strong>agrees</strong> the best direction is <strong>${LABELS[mcBest]}</strong> — now with a real win rate and the actual spread of tai.`
+      : `Monte Carlo recommends <strong>${LABELS[mcBest]}</strong>, not the analytic pick <strong>${LABELS[analyticBest]}</strong>. The analytic model overrates a wide-but-cheap hand's win rate; trust the simulation.`}
+      No opponents are modelled, so absolute win rates are a little optimistic — but the comparison is sound.</div></div>`;
+
+    $('pl-mc').innerHTML = html;
+    const btn = $('pl-mc-btn');
+    if (btn) btn.textContent = `✓ Simulated · ${N_ROLLOUTS} rollouts`;
   }
 
   function resetStats() { stats = fresh(); streak = 0; save(); renderSession(); }

@@ -133,6 +133,30 @@ function bestDiscards(counts, seen) {
 }
 
 /**
+ * Fast complete-hand test: does a 14-tile hand form 4 sets + 1 pair?
+ * Early-exits on the first valid decomposition (cheaper than full shanten),
+ * so it is suitable for the inner loop of a Monte-Carlo rollout.
+ */
+function isComplete(counts) {
+  const t = counts.slice();
+  function rec(i, sets) {
+    while (i < NUM_TYPES && t[i] === 0) i++;
+    if (i === NUM_TYPES) return sets === 4;
+    if (t[i] >= 3) { t[i] -= 3; if (rec(i, sets + 1)) { t[i] += 3; return true; } t[i] += 3; }
+    if (i < 27 && suitPos(i) <= 6 && t[i + 1] > 0 && t[i + 2] > 0) {
+      t[i]--; t[i + 1]--; t[i + 2]--;
+      if (rec(i, sets + 1)) { t[i]++; t[i + 1]++; t[i + 2]++; return true; }
+      t[i]++; t[i + 1]++; t[i + 2]++;
+    }
+    return false;
+  }
+  for (let p = 0; p < NUM_TYPES; p++) {
+    if (t[p] >= 2) { t[p] -= 2; if (rec(0, 0)) { t[p] += 2; return true; } t[p] += 2; }
+  }
+  return false;
+}
+
+/**
  * Constrained shanten — how far the hand is from a winning hand of a specific
  * TYPE. Same decomposition search, but the allowed melds are pruned:
  *   opts.suit   : 0/1/2 to require that suit only (flush), or null for any suit
@@ -215,5 +239,5 @@ function waits(counts) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { shanten, ukeire, bestDiscards, waits, shantenConstrained, ukeireConstrained, totalTiles, NUM_TYPES };
+  module.exports = { shanten, ukeire, bestDiscards, waits, isComplete, shantenConstrained, ukeireConstrained, totalTiles, NUM_TYPES };
 }
