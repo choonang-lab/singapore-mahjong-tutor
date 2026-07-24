@@ -135,17 +135,22 @@
     $('pl-mc-btn').addEventListener('click', runMC);
   }
 
-  // ---- Monte Carlo (tier 3): fast enough (~150ms) to run inline on the main thread ----
-  const N_SCREEN = 1500;    // cheap first pass over all four directions
-  const N_REFINE = 6000;    // extra samples poured into the contenders only
+  // ---- Monte Carlo (tier 3b): opponent-aware. Heavier (~350ms) so it runs
+  //      inline behind a "Simulating…" state on an explicit click. (A Web Worker
+  //      would be non-blocking, but this embedded browser throttles workers ~6x;
+  //      inline is faster and predictable here.) ----
+  const N_SCREEN = 800;     // cheap first pass over all four directions
+  const N_REFINE = 3000;    // extra samples poured into the contenders only
   const Z = 1.96;           // 95% confidence
   const half = (r) => Z * r.evSE;   // 95% interval half-width on EV
+
+  const MC_TYPES = ['fastest', 'fullFlush', 'halfFlush', 'allPongs'];
 
   function runMC() {
     const btn = $('pl-mc-btn');
     if (!btn || btn.disabled) return;
     btn.disabled = true; btn.textContent = 'Simulating…';
-    setTimeout(() => {
+    setTimeout(() => {                                 // let "Simulating…" paint before the blocking work
       const rules = loadRules();
       const suit = (plans.find((p) => p.suit != null) || {}).suit ?? 0;
       const specs = [
@@ -154,16 +159,16 @@
         { type: 'halfFlush', opts: { suit, honors: true } },
         { type: 'allPongs', opts: { chow: false } },
       ];
-      // stage 1 — screen all directions cheaply
+      // stage 1 — screen all directions against a modelled field of 3 opponents
       const res = {};
-      for (const s of specs) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_SCREEN, 20240719);
+      for (const s of specs) res[s.type] = runRolloutsVsField(hand, s.opts, rules, draws, N_SCREEN, 20240719);
       // contenders = anything whose 95% interval reaches the leader's lower bound
       const topEv = Math.max(...specs.map((s) => res[s.type].evMC));
       const leaderLow = topEv - Z * Math.max(...specs.filter((s) => res[s.type].evMC === topEv).map((s) => res[s.type].evSE));
       const contenders = specs.filter((s) => res[s.type].evMC + half(res[s.type]) >= leaderLow);
       // stage 2 — refine only the contenders with more samples
-      for (const s of contenders) res[s.type] = runRollouts(hand, s.opts, rules, draws, N_REFINE, 987654321);
-      renderMC(res, specs, new Set(contenders.map((c) => c.type)));
+      for (const s of contenders) res[s.type] = runRolloutsVsField(hand, s.opts, rules, draws, N_REFINE, 987654321);
+      renderMC(res, MC_TYPES.map((t) => ({ type: t })), new Set(contenders.map((c) => c.type)));
     }, 20);
   }
 
@@ -176,7 +181,7 @@
     const leaderSet = new Set(leaders.map((l) => l.type));
     const clear = leaders.length === 1;
 
-    let html = `<div class="mc-block"><div class="mc-head">Monte Carlo <span>— real win rate, value spread &amp; 95% interval</span></div><div class="mc-rows">`;
+    let html = `<div class="mc-block"><div class="mc-head">Monte Carlo · vs 3 opponents <span>— win rate, value spread &amp; 95% interval</span></div><div class="mc-rows">`;
     for (const r of ranked) {
       html += `<div class="mc-row${leaderSet.has(r.type) ? ' best' : ''}">` +
         `<span class="mc-dir">${LABELS[r.type]}</span>` +
@@ -200,18 +205,31 @@
       html += `</div>`;
     }
 
+    // outcome breakdown for the top direction — where the wins go
+    const how = top.how || {};
+    const p = (k) => Math.round(((how[k] || 0) / top.n) * 100);
+    html += `<div class="mc-outcome">When <strong>${LABELS[top.type]}</strong> doesn't win: ` +
+      `<span class="oc">${p('opp-tsumo')}% opponent wins first</span> · ` +
+      `<span class="oc">${p('dealin')}% you deal in</span> · ` +
+      `<span class="oc">${p('exhaust')}% washes out</span>.</div>`;
+
     // verdict
     let verdict;
+    const flipToSpeed = clear && top.type === 'fastest' && analyticBest !== 'fastest';
     if (clear) {
-      verdict = top.type === analyticBest
-        ? `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field — and it agrees with the analytic pick.`
-        : `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field (the analytic pick was <strong>${LABELS[analyticBest]}</strong> — that model overrates wide-but-cheap hands).`;
+      if (flipToSpeed) {
+        verdict = `With opponents in the picture, <strong>Fastest</strong> wins — the analytic pick <strong>${LABELS[analyticBest]}</strong> is too slow (opponents complete first) and too easily read (they fold against it). Speed beats the big hand here.`;
+      } else if (top.type === analyticBest) {
+        verdict = `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field — and it agrees with the analytic pick even once opponents are modelled.`;
+      } else {
+        verdict = `Monte Carlo recommends <strong>${LABELS[top.type]}</strong>, clear of the field (the analytic pick was <strong>${LABELS[analyticBest]}</strong>, which ignores opponents).`;
+      }
     } else {
       const names = leaders.map((l) => `<strong>${LABELS[l.type]}</strong>`).join(', ');
-      verdict = `<strong>Too close to call.</strong> ${names} are within the simulation's margin of error — any is a fine choice here; let defense and what your opponents are showing decide.`;
+      verdict = `<strong>Too close to call.</strong> ${names} are within the simulation's margin of error — any is a fine choice; let defense and what your opponents are showing decide.`;
     }
     html += `<div class="row note">${verdict}</div>`;
-    html += `<div class="row note method">Screened 4 directions at ${N_SCREEN.toLocaleString()} rollouts, refined the contenders to ${N_REFINE.toLocaleString()}. <strong>±</strong> is the 95% interval; overlapping intervals can't be separated. Absolute rates are optimistic (no opponents modelled) — trust the comparison, not the decimals.</div></div>`;
+    html += `<div class="row note method">Screened at ${N_SCREEN.toLocaleString()} rollouts, contenders refined to ${N_REFINE.toLocaleString()}, each vs 3 opponents who develop, win first, and fold against obvious threats. <strong>±</strong> is the 95% interval. The opponent model is informed, not calibrated — trust the comparison, not the decimals.</div></div>`;
 
     $('pl-mc').innerHTML = html;
     const btn = $('pl-mc-btn');

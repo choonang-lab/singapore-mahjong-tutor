@@ -152,6 +152,9 @@ header h1 button:hover { border: none; opacity: .85; }
 .mc-num.ev { color: var(--accent); font-weight: 700; margin-left: auto; }
 .mc-ci { color: var(--muted); font-weight: 500; font-size: .82em; }
 .row.note.method { font-size: .8rem; opacity: .85; margin-top: 6px; }
+.mc-outcome { font-size: .82rem; color: var(--muted); margin: 4px 0 10px; padding: 8px 10px; background: var(--bg); border-radius: 8px; line-height: 1.6; }
+.mc-outcome strong { color: var(--ink); }
+.mc-outcome .oc { white-space: nowrap; }
 .mc-hist { margin-bottom: 10px; }
 .mc-hist-label { font-size: .78rem; color: var(--muted); margin-bottom: 5px; }
 .hbar { display: flex; align-items: center; gap: 8px; margin: 3px 0; font-size: .8rem; }

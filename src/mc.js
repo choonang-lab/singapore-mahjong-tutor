@@ -135,6 +135,106 @@ function runRollouts(hand, opts, rules, draws, n, seed) {
   return { n, wins, winRate, meanTai, evMC, evSE, hist };
 }
 
+/* ============================================================================
+ * Opponent-aware rollout (tier 3b): 3 abstracted opponents who develop, can
+ * win before you (tsumo), can be dealt into when you push, and fold against an
+ * obvious threat. Removes the "solo" model's optimism and its flush over-rating.
+ *
+ * Opponents are ABSTRACTED as (shanten, wait) rather than full 13-tile hands —
+ * cheap enough for thousands of rollouts, faithful to the effects that matter.
+ * Parameters below are chosen to land win rates in a realistic range (see the
+ * bench); they are an informed model, not a calibrated one. Opponent-vs-opponent
+ * ron and furiten are not modelled (a small further optimism).
+ * ========================================================================== */
+const N_OPPS = 3;
+function startShanten(rng) { const r = rng(); return r < 0.15 ? 1 : r < 0.60 ? 2 : 3; }  // mid-hand mix
+function pAdvance(s) { return 0.20 + 0.04 * s; }                                          // wider when further out
+function foldBiasFor(opts) {                                                              // how obvious the threat is
+  if (opts.suit != null && opts.honors === false) return 0.70;  // full flush — very readable
+  if (opts.suit != null) return 0.50;                            // half flush
+  return 0.30;                                                   // fastest / all-pongs
+}
+function assignWait(rng, wall) {
+  const w = new Set(); const n = rng() < 0.5 ? 1 : 2; let tries = 0;
+  while (w.size < n && tries < 30) { tries++; const t = Math.floor(rng() * 34); if (wall[t] > 0) w.add(t); }
+  if (!w.size) w.add(Math.floor(rng() * 34));
+  return w;
+}
+function myWaitsArr(hand) {
+  const w = [];
+  for (let t = 0; t < 34; t++) { if (hand[t] >= 4) continue; hand[t]++; if (agari(hand)) w.push(t); hand[t]--; }
+  return w;
+}
+function completeValue(hand, tile, rules) {
+  hand[tile]++; const sc = scoreFn(hand, CTX, rules); hand[tile]--;
+  return sc.total >= rules.minTai ? sc.capped : -1;
+}
+
+function rolloutVsField(start, opts, rules, draws, rng, foldBias) {
+  const hand = start.slice();
+  const wall = new Array(34); let total = 0;
+  for (let i = 0; i < 34; i++) { wall[i] = 4 - hand[i]; total += wall[i]; }
+  const opps = [];
+  for (let k = 0; k < N_OPPS; k++) opps.push({ sh: startShanten(rng), wait: null });
+  let myWait = null;
+
+  for (let go = 0; go < draws && total > 0; go++) {
+    // --- my draw ---
+    const t = drawFrom(wall, total, rng);
+    if (t < 0) break;
+    wall[t]--; total--; hand[t]++;
+    if (agari(hand)) {
+      const sc = scoreFn(hand, CTX, rules);
+      if (sc.total >= rules.minTai) return { win: true, tai: sc.capped, how: 'tsumo' };
+      hand[t]--;                                    // valueless completion — keep going
+    } else {
+      const d = chooseDiscard(hand, opts);
+      hand[d]--;
+      for (const o of opps) if (o.wait && o.wait.has(d)) return { win: false, tai: 0, how: 'dealin' }; // I dealt in
+    }
+    const w = myWaitsArr(hand);
+    myWait = w.length ? w : null;
+
+    // --- opponents' go-around ---
+    const wLive = myWait ? myWait.reduce((s, tt) => s + wall[tt], 0) : 0;
+    for (const o of opps) {
+      if (total <= 0) break;
+      const ot = drawFrom(wall, total, rng);
+      if (ot < 0) break;
+      wall[ot]--; total--;
+      if (o.wait) {
+        if (o.wait.has(ot)) return { win: false, tai: 0, how: 'opp-tsumo' };   // opponent won first
+      } else if (rng() < pAdvance(o.sh)) {
+        o.sh--; if (o.sh <= 0) o.wait = assignWait(rng, wall);
+      }
+      // my ron off this opponent's discard, unless they fold against my threat
+      if (myWait && wLive > 0 && total > 0 && rng() >= foldBias && rng() < wLive / total) {
+        let best = -1;
+        for (const tt of myWait) { const v = completeValue(hand, tt, rules); if (v > best) best = v; }
+        if (best >= 0) return { win: true, tai: best, how: 'ron' };
+      }
+    }
+  }
+  return { win: false, tai: 0, how: 'exhaust' };
+}
+
+function runRolloutsVsField(hand, opts, rules, draws, n, seed) {
+  const rng = mulberry32(seed);
+  const foldBias = foldBiasFor(opts);
+  let wins = 0, taiSum = 0, taiSqSum = 0;
+  const hist = {}, how = {};
+  for (let k = 0; k < n; k++) {
+    const r = rolloutVsField(hand, opts, rules, draws, rng, foldBias);
+    how[r.how] = (how[r.how] || 0) + 1;
+    if (r.win) { wins++; taiSum += r.tai; taiSqSum += r.tai * r.tai; hist[r.tai] = (hist[r.tai] || 0) + 1; }
+  }
+  const winRate = wins / n;
+  const meanTai = wins ? taiSum / wins : 0;
+  const evMC = taiSum / n;
+  const varX = Math.max(0, taiSqSum / n - evMC * evMC);
+  return { n, wins, winRate, meanTai, evMC, evSE: Math.sqrt(varX / n), hist, how };
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { runRollouts, rollout, chooseDiscard, mulberry32 };
+  module.exports = { runRollouts, runRolloutsVsField, rollout, rolloutVsField, chooseDiscard, mulberry32 };
 }

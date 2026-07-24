@@ -1,4 +1,4 @@
-const { runRollouts } = require('./mc');
+const { runRollouts, runRolloutsVsField } = require('./mc');
 const { DEFAULT_RULES: R } = require('./rules');
 
 function toCounts(str) {
@@ -42,6 +42,20 @@ const big = runRollouts(toCounts('123s 456s 78s 9s 2s 5s 1m 3p'), { suit: 2, hon
 eq('evSE finite & >= 0', Number.isFinite(small.evSE) && small.evSE >= 0, true);
 eq('evSE shrinks with more rollouts', big.evSE < small.evSE, true);
 eq('evSE roughly halves at ~9x N', small.evSE / big.evSE > 2 && small.evSE / big.evSE < 4, true);
+
+// ---- opponent-aware (field) model ----
+const handF = toCounts('123s 456s 78s 9s 2s 5s 1m 3p');
+const solo = runRollouts(handF, { suit: 2, honors: false }, R, 8, 3000, 42);
+const field = runRolloutsVsField(handF, { suit: 2, honors: false }, R, 8, 3000, 42);
+eq('field win rate below solo (opponents win first / deal-ins)', field.winRate < solo.winRate, true);
+eq('field reports outcome breakdown', typeof field.how === 'object' && field.how.exhaust > 0, true);
+eq('field records opponent wins', (field.how['opp-tsumo'] || 0) + (field.how['dealin'] || 0) > 0, true);
+eq('field evSE finite', Number.isFinite(field.evSE) && field.evSE >= 0, true);
+// flush is folded against harder than fastest -> fastest relatively less penalised by the field
+const fSolo = runRollouts(handF, {}, R, 8, 3000, 42);
+const fField = runRolloutsVsField(handF, {}, R, 8, 3000, 42);
+eq('fastest loses less win-rate to the field than full flush does',
+  (fSolo.winRate - fField.winRate) < (solo.winRate - field.winRate), true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

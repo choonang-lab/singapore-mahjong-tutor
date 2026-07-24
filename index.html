@@ -363,9 +363,12 @@
         <p>The tension: a <strong>full flush</strong> is worth a lot but is usually further away and narrower;
         the <strong>fastest</strong> hand wins often but cheaply. Early in the hand, value wins; late, speed wins —
         try the same hand at different turns.</p>
-        <p class="note">This is the analytic estimate (instant, offline). The win-chance model reuses current
-        acceptance for every step, so it slightly overrates deep hands; a Monte-Carlo pass would refine the win
-        rate and reveal the full spread of possible tai. Defense (deal-in risk) is a separate layer — see Push/Fold.</p>
+        <p class="note">The table is the instant analytic estimate. <strong>Run Monte Carlo</strong> to refine it:
+        it simulates the rest of the hand thousands of times against <strong>3 modelled opponents</strong> who develop,
+        can win before you, can be dealt into, and fold against an obvious threat. That often flips the answer toward
+        <em>speed</em> — a big flush that's slow and easily read loses to opponents. It reports a real win rate, the full
+        tai spread, and 95% intervals (so close calls read as "too close to call"). The opponent model is informed, not
+        calibrated — trust the comparison, not the exact win rates.</p>
       </details>
     </section>
 
