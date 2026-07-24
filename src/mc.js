@@ -170,10 +170,10 @@ function completeValue(hand, tile, rules) {
   return sc.total >= rules.minTai ? sc.capped : -1;
 }
 
-function rolloutVsField(start, opts, rules, draws, rng, foldBias) {
+function rolloutVsField(start, opts, rules, draws, rng, foldBias, discards) {
   const hand = start.slice();
   const wall = new Array(34); let total = 0;
-  for (let i = 0; i < 34; i++) { wall[i] = 4 - hand[i]; total += wall[i]; }
+  for (let i = 0; i < 34; i++) { wall[i] = Math.max(0, 4 - hand[i] - (discards ? discards[i] : 0)); total += wall[i]; }
   const opps = [];
   for (let k = 0; k < N_OPPS; k++) opps.push({ sh: startShanten(rng), wait: null });
   let myWait = null;
@@ -218,13 +218,13 @@ function rolloutVsField(start, opts, rules, draws, rng, foldBias) {
   return { win: false, tai: 0, how: 'exhaust' };
 }
 
-function runRolloutsVsField(hand, opts, rules, draws, n, seed) {
+function runRolloutsVsField(hand, opts, rules, draws, n, seed, discards) {
   const rng = mulberry32(seed);
   const foldBias = foldBiasFor(opts);
   let wins = 0, taiSum = 0, taiSqSum = 0;
   const hist = {}, how = {};
   for (let k = 0; k < n; k++) {
-    const r = rolloutVsField(hand, opts, rules, draws, rng, foldBias);
+    const r = rolloutVsField(hand, opts, rules, draws, rng, foldBias, discards);
     how[r.how] = (how[r.how] || 0) + 1;
     if (r.win) { wins++; taiSum += r.tai; taiSqSum += r.tai * r.tai; hist[r.tai] = (hist[r.tai] || 0) + 1; }
   }

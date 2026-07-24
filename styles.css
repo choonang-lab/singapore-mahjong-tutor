@@ -133,6 +133,26 @@ header h1 button:hover { border: none; opacity: .85; }
 .tai-btn.right { background: var(--good-bg); border-color: var(--good); color: var(--good); }
 .tai-btn.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
 
+/* analyze (live-hand advisor) */
+.az-zones { display: grid; gap: 12px; margin-bottom: 14px; }
+.az-zone { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); }
+.az-zone-head { font-size: .82rem; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.az-hint { font-size: .74rem; opacity: .85; }
+.az-count { margin-left: auto; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.az-count.ready { color: var(--good); }
+.az-tiles { display: flex; flex-wrap: wrap; gap: 5px; min-height: 48px; }
+.az-tiles:empty::before { content: 'tap tiles below to add'; color: var(--muted); font-size: .82rem; font-style: italic; align-self: center; }
+.az-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.az-target { font-size: .88rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.az-target-btn { font: inherit; font-size: .85rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--muted); box-shadow: none; }
+.az-target-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.az-controls input[type="number"] { width: 56px; font: inherit; font-weight: 700; text-align: center; padding: 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.az-palette { display: flex; flex-direction: column; gap: 5px; margin-bottom: 18px; }
+.az-prow { display: flex; flex-wrap: wrap; gap: 4px; }
+.az-ptile { position: relative; width: 40px; height: 54px; font-size: 27px; border-bottom-width: 2px; }
+.az-ptile:disabled { opacity: .3; cursor: default; }
+.az-remain { position: absolute; bottom: 1px; right: 2px; font-size: .58rem; font-weight: 700; color: var(--muted); }
+
 /* best plan (Module 6) */
 .mc-run {
   width: 100%; margin-top: 12px; font: inherit; font-weight: 700; font-size: .92rem;

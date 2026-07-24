@@ -48,5 +48,17 @@ plans = analyzePlans(toCounts('11m 22m 33p 44p 55s 6s 9m'), ctx, R, 8);
 const t3 = Object.fromEntries(plans.map((p) => [p.type, p]));
 eq('pairs hand: all-pongs value = allPongs tai', t3.allPongs.value >= R.allPongs, true);
 
+// ---- discard awareness ----
+// a bamboo flush hand; if the bamboo tiles it needs are already discarded, the flush's acceptance drops
+const flushHand = toCounts('123s 456s 78s 9s 2s 5s 1m 3p');
+const noDisc = analyzePlans(flushHand, ctx, R, 8);
+const discards = new Array(34).fill(0);
+[18, 19, 20, 21, 22, 23, 24, 25, 26].forEach((i) => { discards[i] = 4 - flushHand[i]; }); // kill remaining bamboo
+const withDisc = analyzePlans(flushHand, ctx, R, 8, discards);
+const ff0 = noDisc.find((p) => p.type === 'fullFlush');
+const ff1 = withDisc.find((p) => p.type === 'fullFlush');
+eq('discards reduce full-flush acceptance', ff1.ukeire < ff0.ukeire, true);
+eq('discards reduce full-flush win chance', ff1.pWin <= ff0.pWin, true);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

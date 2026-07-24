@@ -20,7 +20,7 @@ if (typeof module !== 'undefined' && module.exports) {
   _score = require('./scorer').scoreHand;
 }
 function shC(c, o) { return (_eng ? _eng.shantenConstrained : shantenConstrained)(c, o); }
-function ukC(c, o) { return (_eng ? _eng.ukeireConstrained : ukeireConstrained)(c, o); }
+function ukC(c, o, seen) { return (_eng ? _eng.ukeireConstrained : ukeireConstrained)(c, o, seen); }
 
 function comb(n, k) {
   if (k < 0 || k > n) return 0;
@@ -76,14 +76,18 @@ const PLANS = [
  * Analyse a 13-tile hand. Returns plans sorted best-EV first, each:
  *   { type, label, suit, shanten, ukeire, value, pWin, ev }
  */
-function analyzePlans(counts, ctx, rules, draws) {
+function analyzePlans(counts, ctx, rules, draws, discards) {
   const context = Object.assign({ seatWind: 0, roundWind: 0 }, ctx || {});
   const suit = dominantSuit(counts);
-  const unseen = 136 - 13;
+  // seen = your hand + everything already visible (discards, melds); live copies = 4 - seen
+  const seen = counts.slice();
+  let handCount = 0, seenExtra = 0;
+  for (let i = 0; i < 34; i++) { handCount += counts[i]; if (discards) { seen[i] += discards[i]; seenExtra += discards[i]; } }
+  const unseen = Math.max(1, 136 - handCount - seenExtra);
   const out = [];
   for (const p of PLANS) {
     const opts = p.opts(suit);
-    const u = ukC(counts, opts);
+    const u = ukC(counts, opts, seen);
     const sh = u.shanten;
     const value = estimateValue(counts, p.type, context, rules);
     const pStep = u.total / unseen;

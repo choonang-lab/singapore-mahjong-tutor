@@ -30,6 +30,7 @@
         <button data-target="module-defense">4 · Defense</button>
         <button data-target="module-pushfold">5 · Push/Fold</button>
         <button data-target="module-plan">6 · Plan</button>
+        <button data-target="module-analyze">🔍 Analyze</button>
         <button data-target="module-rules">⚙ Rules</button>
       </nav>
     </header>
@@ -95,6 +96,14 @@
             <span class="hc-title">Best Plan <span class="hc-tag">EV</span></span>
             <span class="hc-desc">Which hand to go for — expected value across directions.</span>
             <span class="hc-progress" data-stat="plan">Not started</span>
+          </span>
+        </button>
+        <button class="home-card" data-target="module-analyze">
+          <span class="hc-num">🔍</span>
+          <span class="hc-body">
+            <span class="hc-title">Analyze <span class="hc-tag">tool</span></span>
+            <span class="hc-desc">Enter your real hand + what's visible → what to go for, right now.</span>
+            <span class="hc-progress">Live-hand advisor</span>
           </span>
         </button>
       </div>
@@ -372,6 +381,51 @@
       </details>
     </section>
 
+    <!-- ============ ANALYZE (your real hand) ============ -->
+    <section id="module-analyze" hidden>
+      <p class="tagline">Analyze — <em>your real hand: what to go for.</em></p>
+
+      <div class="az-zones">
+        <div class="az-zone">
+          <div class="az-zone-head">Your hand <span id="az-hand-count" class="az-count">0 / 13</span></div>
+          <div id="az-hand" class="az-tiles" role="group" aria-label="Your hand"></div>
+        </div>
+        <div class="az-zone">
+          <div class="az-zone-head">Seen elsewhere <span class="az-hint">discards, melds — fewer live tiles</span> <span id="az-seen-count" class="az-count">0</span></div>
+          <div id="az-seen" class="az-tiles" role="group" aria-label="Seen tiles"></div>
+        </div>
+      </div>
+
+      <div class="az-controls">
+        <span class="az-target">Add to:
+          <button id="az-target-hand" class="az-target-btn active" type="button" data-zone="hand">Hand</button>
+          <button id="az-target-seen" class="az-target-btn" type="button" data-zone="seen">Seen</button>
+        </span>
+        <label class="toggle" for="az-draws">Draws left
+          <input id="az-draws" type="number" min="1" max="18" value="8" inputmode="numeric" />
+        </label>
+        <button id="az-clear" class="link" type="button">Clear</button>
+      </div>
+
+      <div id="az-palette" class="az-palette" aria-label="Tile picker"></div>
+
+      <div class="controls">
+        <button id="az-analyze" class="primary" type="button" disabled>Analyze my hand</button>
+      </div>
+
+      <div id="az-result" class="feedback" hidden></div>
+
+      <details class="explainer">
+        <summary>How Analyze works</summary>
+        <p>Tap tiles to enter your <strong>13-tile hand</strong>. Switch “Add to” to <strong>Seen</strong> and add any tiles
+        already visible — your discards, opponents' discards, exposed melds — so the count of <strong>live</strong> tiles you
+        can still draw is right (a flush is correctly worse when its tiles are gone). Set <strong>draws left</strong>, then Analyze
+        ranks the directions by expected value; run the simulation to weigh it against opponents.</p>
+        <p class="note">It can't see opponents' concealed hands (no one can), so the opponent model stays statistical.
+        Rules come from the ⚙ Rules screen.</p>
+      </details>
+    </section>
+
     <!-- ============ RULES EDITOR ============ -->
     <section id="module-rules" hidden>
       <p class="tagline">Table rules — <em>Singapore mahjong varies by house. Set yours.</em></p>
@@ -405,7 +459,9 @@
   <script src="src/pushfold-app.js"></script>
   <script src="src/plan.js"></script>
   <script src="src/mc.js"></script>
+  <script src="src/plan-render.js"></script>
   <script src="src/plan-app.js"></script>
+  <script src="src/analyze-app.js"></script>
   <script src="src/rules-editor.js"></script>
   <script src="src/home.js"></script>
   <script>
